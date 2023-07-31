@@ -1,0 +1,7 @@
+Data Peserta Bootcamp Digital Skill - Golang Backend Development
+1. Nama: Fathoni Zikri Nugroho
+2. Email: fathonizikri11@gmail.com
+3. Sistem Operasi yang digunakan: Windows 11
+4. Akun Gitlab: https://gitlab.com/fathonizkrngrh
+4. Akun Github: https://github.com/fathonizkrngrh
+5. Akun Telegram: Fathoni Zikri Nugroho
