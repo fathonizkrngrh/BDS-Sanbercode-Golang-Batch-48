@@ -16,6 +16,6 @@
 
 ![jawaban dari soal 4](./output/soal4.png)
 
-## Soal 4
+## Soal 5
 
 ![jawaban dari soal 5](./output/soal5.png)
