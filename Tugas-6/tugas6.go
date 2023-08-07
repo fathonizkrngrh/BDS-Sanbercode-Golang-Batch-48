@@ -30,6 +30,24 @@ func introduce(sentence *string, name, gender, job, age string) {
 	*sentence = fmt.Sprintf("%s %s adalah seorang %s yang berusia %d tahun", called, name, job, ageNum)
 }
 
+// Soal 3
+
+func addFruits(fruits *[]string, newFruits ...string) {
+	*fruits = append(*fruits, newFruits...)
+}
+
+// Soal 4
+
+func addFilms(title, duration, genre, year string, dataFilm *[]map[string]string) {
+	newFilm := map[string]string{
+		"title":    title,
+		"duration": duration,
+		"genre":    genre,
+		"year":     year,
+	}
+
+	*dataFilm = append(*dataFilm, newFilm)
+}
 
 func main() {
 	
@@ -66,4 +84,34 @@ func main() {
 
 	introduce(&sentence, "Sarah", "perempuan", "model", "28")
 	fmt.Println( sentence)
+
+	// Soal 3
+
+	fmt.Println("\n====== Soal 3 ======")
+
+	var buah = []string{}
+
+	addFruits(&buah, "Jeruk", "Semangka", "Mangga", "Strawberry", "Durian", "Manggis", "Alpukat")
+
+	for i, fruit := range buah {
+		fmt.Printf("%d. %s\n", i+1, fruit)
+	}
+
+	// Soal 4
+
+	fmt.Println("\n====== Soal 4 ======")
+
+	var dataFilm = []map[string]string{}
+
+	addFilms("LOTR", "2 jam", "action", "1999", &dataFilm)
+	addFilms("avenger", "2 jam", "action", "2019", &dataFilm)
+	addFilms("spiderman", "2 jam", "action", "2004", &dataFilm)
+	addFilms("juon", "2 jam", "horror", "2004", &dataFilm)
+
+	for i, film := range dataFilm {
+		fmt.Printf("%d. title : %s\n", i+1, film["title"])
+		fmt.Printf("   duration : %s\n", film["duration"])
+		fmt.Printf("   genre : %s\n", film["genre"])
+		fmt.Printf("   year : %s\n", film["year"])
+	}
 }
