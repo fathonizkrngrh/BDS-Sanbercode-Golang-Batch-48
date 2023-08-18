@@ -58,13 +58,29 @@ func GetAll(ctx context.Context) ([]data.NilaiMahasiswa, error) {
 	return nilaiMhs, nil
 }
 
+func IsDuplicateMahasiswa(ctx context.Context, nama, mataKuliah string) (bool, error) {
+    db, err := config.MySQL()
+    if err != nil {
+        return false, err
+    }
+
+    queryText := fmt.Sprintf("SELECT COUNT(*) FROM %v WHERE nama = '%v' AND mata_kuliah = '%v'", table, nama, mataKuliah)
+    var count int
+    err = db.QueryRowContext(ctx, queryText).Scan(&count)
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}
+
 func Insert(ctx context.Context, nilai data.NilaiMahasiswa) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
 	}
 	
-	queryText := fmt.Sprintf("INSERT IGNORE INTO %v (nama, mata_kuliah, indeks_nilai, nilai, created_at, updated_at) values('%v',%v,'%v',%v, NOW(), NOW())", table,
+	queryText := fmt.Sprintf("INSERT IGNORE INTO %v (nama, mata_kuliah, indeks_nilai, nilai, created_at, updated_at) values('%v','%v','%v',%v, NOW(), NOW())", table,
 	  	nilai.Nama,
 	  	nilai.MataKuliah,
 		nilai.IndeksNilai,

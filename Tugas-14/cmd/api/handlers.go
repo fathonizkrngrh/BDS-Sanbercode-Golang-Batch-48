@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"tugas14/data"
 	"tugas14/nilai"
@@ -34,7 +34,7 @@ func (app *Config) GetAllNilaiMahasiswa(w http.ResponseWriter, _ *http.Request, 
 	utils.WriteJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) InserNilaiMahasiswa(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (app *Config) InsertNilaiMahasiswa(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	if r.Header.Get("Content-Type") == "application/json" {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -46,9 +46,18 @@ func (app *Config) InserNilaiMahasiswa(w http.ResponseWriter, r *http.Request, _
 			return
 		}
 
-		newNilai.IndeksNilai = GetIndeksNilai(newNilai.Nilai)
+		isDuplicate, err := nilai.IsDuplicateMahasiswa(ctx, newNilai.Nama, newNilai.MataKuliah)
+		if err != nil {
+			utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR", http.StatusInternalServerError)
+			return
+		}
 
-		log.Println(newNilai)
+		if isDuplicate {
+			utils.ErrorJSON(w, errors.New("Data dengan Nama dan Mata Kuliah tersebut sudah ada"), "CONFLICT", http.StatusConflict)
+			return
+		}
+
+		newNilai.IndeksNilai = GetIndeksNilai(newNilai.Nilai)
 
 		if err := nilai.Insert(ctx, newNilai); err != nil {
 			utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
@@ -58,7 +67,7 @@ func (app *Config) InserNilaiMahasiswa(w http.ResponseWriter, r *http.Request, _
 		payload := utils.JsonResponse{
 			Code: http.StatusCreated,
 			Status: "OK",
-			Message: "Success get all nilai mahasiswa",
+			Message: fmt.Sprintf("Success insert data mahasiswa %s", newNilai.Nama),
 			Data: newNilai,
 		}
 	  
@@ -90,10 +99,11 @@ func (app *Config) InserNilaiMahasiswa(w http.ResponseWriter, r *http.Request, _
 		payload := utils.JsonResponse{
 			Code: http.StatusCreated,
 			Status: "OK",
-			Message: "Success get all nilai mahasiswa",
+			Message: fmt.Sprintf("Success insert data mahasiswa %s", newNilai.Nama),
 			Data: newNilai,
 		}
 	  
 		utils.WriteJSON(w, http.StatusCreated, payload)
 	}
 }
+

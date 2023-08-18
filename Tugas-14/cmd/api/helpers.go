@@ -4,15 +4,6 @@ import (
 	"strconv"
 )
 
-type jsonResponse struct {
-	Status  string      `json:"status"`
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    any 		`json:"data,omitempty"`
-	Error   any 		`json:"error,omitempty"`
-}
-
-
 func GetIndeksNilai(nilai int) string {
 	if nilai >= 80 {
 		return "A"

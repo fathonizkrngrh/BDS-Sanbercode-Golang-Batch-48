@@ -43,7 +43,12 @@ func ErrorJSON(w http.ResponseWriter, err error,  status string, code ...int) er
 	var payload JsonResponse
 	payload.Status = status
 	payload.Code = statusCode
-	payload.Message = err.Error()
+
+	if err != nil {
+		payload.Message = err.Error()  
+	} else {
+		payload.Message ="Something went wrong"
+	}
 
 	return WriteJSON(w, statusCode, payload)
 }
