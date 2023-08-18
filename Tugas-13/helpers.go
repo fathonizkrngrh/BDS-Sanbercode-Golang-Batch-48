@@ -26,7 +26,7 @@ func WriteResponse(w http.ResponseWriter, code int, status string, message strin
 	json.NewEncoder(w).Encode(response)
 }
 
-func GetIndeksNilai(nilai uint) string {
+func GetIndeksNilai(nilai int) string {
 	if nilai >= 80 {
 		return "A"
 	} else if nilai >= 70 {
@@ -39,8 +39,8 @@ func GetIndeksNilai(nilai uint) string {
 	return "E"
 }
 
-func ParseUint(s string) uint {
-	val, _ := strconv.ParseUint(s, 10, 32)
-	return uint(val)
+func ParseInt(s string) int {
+	val, _ := strconv.ParseInt(s, 10, 32)
+	return int(val)
 }
 

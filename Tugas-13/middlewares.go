@@ -13,7 +13,6 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 		user, pass, ok := r.BasicAuth()
 		if !ok {
 			WriteResponse(w, http.StatusUnauthorized, "UNAUTHORIZED", errors.New("Username atau Password tidak boleh kosong").Error(), nil)
-			
 			return
 		}
 		if user != username || pass != password {
