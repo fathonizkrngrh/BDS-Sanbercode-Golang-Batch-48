@@ -1,4 +1,4 @@
-package nilai
+package mahasiswa
 
 import (
 	"context"
@@ -15,7 +15,7 @@ const (
 )
 
 func GetAll(ctx context.Context) ([]data.Mahasiswa, error) {
-	var mataKuliah []data.Mahasiswa
+	var mahasiswa []data.Mahasiswa
 	db, err := config.MySQL()
 
 	if err != nil {
@@ -30,32 +30,32 @@ func GetAll(ctx context.Context) ([]data.Mahasiswa, error) {
 	}
 
 	for rowQuery.Next() {
-		var matKul data.Mahasiswa
+		var mhs data.Mahasiswa
 		var createdAt, updatedAt string
-		if err = rowQuery.Scan(&matKul.ID,
-			&matKul.Nama,
+		if err = rowQuery.Scan(&mhs.ID,
+			&mhs.Nama,
 			&createdAt,
 			&updatedAt); err != nil {
 			return nil, err
 		}
 
-		matKul.CreatedAt, err = time.Parse(layoutDateTime, createdAt)
+		mhs.CreatedAt, err = time.Parse(layoutDateTime, createdAt)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		matKul.UpdatedAt, err = time.Parse(layoutDateTime, updatedAt)
+		mhs.UpdatedAt, err = time.Parse(layoutDateTime, updatedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		mataKuliah = append(mataKuliah, matKul)
+		mahasiswa = append(mahasiswa, mhs)
 	}
-	return mataKuliah, nil
+	return mahasiswa, nil
 }
 
-func IsDuplicateMataKuliah(ctx context.Context, nama string) (bool, error) {
+func IsDuplicateMahasiswa(ctx context.Context, nama string) (bool, error) {
     db, err := config.MySQL()
     if err != nil {
         return false, err
@@ -71,23 +71,24 @@ func IsDuplicateMataKuliah(ctx context.Context, nama string) (bool, error) {
     return count > 0, nil
 }
 
-func Insert(ctx context.Context, matkul data.Mahasiswa) error {
+func Insert(ctx context.Context, mahasiswa data.Mahasiswa) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
 	}
 	
 	queryText := fmt.Sprintf("INSERT IGNORE INTO %v (nama, created_at, updated_at) values('%v', NOW(), NOW())", table,
-	  	matkul.Nama)
+	  	mahasiswa.Nama)
 	_, err = db.ExecContext(ctx, queryText)
 
 	if err != nil {
 	  return err
 	}
+
 	return nil
 }
 
-func UpdateByID(ctx context.Context, matkul data.Mahasiswa, id string) error {
+func UpdateByID(ctx context.Context, mahasiswa data.Mahasiswa, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)
@@ -95,7 +96,7 @@ func UpdateByID(ctx context.Context, matkul data.Mahasiswa, id string) error {
 
 	queryText := fmt.Sprintf("UPDATE %v SET nama = '%v', updated_at = NOW() WHERE id = %v",
 		table,
-		matkul.Nama,
+		mahasiswa.Nama,
 		id)
 
 	_, err = db.ExecContext(ctx, queryText)

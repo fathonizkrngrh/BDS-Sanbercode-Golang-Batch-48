@@ -58,13 +58,13 @@ func GetAll(ctx context.Context) ([]data.Nilai, error) {
 	return nilaiMhs, nil
 }
 
-func IsDuplicateNilai(ctx context.Context, mahasiswa_id, mata_kuliah_id string) (bool, error) {
+func IsDuplicateNilai(ctx context.Context, mahasiswa_id, mata_kuliah_id int) (bool, error) {
     db, err := config.MySQL()
     if err != nil {
         return false, err
     }
 
-    queryText := fmt.Sprintf("SELECT COUNT(*) FROM %v WHERE mahasiswa_id = '%v' AND mata_kuliah_id = '%v'", table, mahasiswa_id, mata_kuliah_id)
+    queryText := fmt.Sprintf("SELECT COUNT(*) FROM %v WHERE mahasiswa_id = %v AND mata_kuliah_id = %v", table, mahasiswa_id, mata_kuliah_id)
     var count int
     err = db.QueryRowContext(ctx, queryText).Scan(&count)
     if err != nil {
@@ -74,7 +74,7 @@ func IsDuplicateNilai(ctx context.Context, mahasiswa_id, mata_kuliah_id string) 
     return count > 0, nil
 }
 
-func Insert(ctx context.Context, nilai data.Nilai, id string) error {
+func Insert(ctx context.Context, nilai data.Nilai) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
@@ -93,7 +93,7 @@ func Insert(ctx context.Context, nilai data.Nilai, id string) error {
 	return nil
 }
 
-func UpdateByID(ctx context.Context, nilai data.Nilai, id string) error {
+func UpdateByID(ctx context.Context, nilai data.Nilai, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)

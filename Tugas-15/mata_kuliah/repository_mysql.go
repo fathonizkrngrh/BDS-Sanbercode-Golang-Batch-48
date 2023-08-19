@@ -1,4 +1,4 @@
-package nilai
+package mata_kuliah
 
 import (
 	"context"
@@ -87,7 +87,7 @@ func Insert(ctx context.Context, matkul data.MataKuliah) error {
 	return nil
 }
 
-func UpdateByID(ctx context.Context, matkul data.MataKuliah, id string) error {
+func UpdateByID(ctx context.Context, matkul data.MataKuliah, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)
