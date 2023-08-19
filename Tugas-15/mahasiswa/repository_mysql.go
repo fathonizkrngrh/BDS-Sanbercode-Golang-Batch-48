@@ -7,6 +7,7 @@ import (
 	"time"
 	"tugas15/config"
 	"tugas15/data"
+	"tugas15/form"
 )
 
 const (
@@ -55,6 +56,22 @@ func GetAll(ctx context.Context) ([]data.Mahasiswa, error) {
 	return mahasiswa, nil
 }
 
+func IsExist(ctx context.Context, id int) (bool, error) {
+    db, err := config.MySQL()
+    if err != nil {
+        return false, err
+    }
+
+    queryText := fmt.Sprintf("SELECT COUNT(*) FROM %v WHERE id = %v", table, id)
+    var count int
+    err = db.QueryRowContext(ctx, queryText).Scan(&count)
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}
+
 func IsDuplicateMahasiswa(ctx context.Context, nama string) (bool, error) {
     db, err := config.MySQL()
     if err != nil {
@@ -71,7 +88,7 @@ func IsDuplicateMahasiswa(ctx context.Context, nama string) (bool, error) {
     return count > 0, nil
 }
 
-func Insert(ctx context.Context, mahasiswa data.Mahasiswa) error {
+func Insert(ctx context.Context, mahasiswa form.InsertMahasiswa) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
@@ -88,7 +105,7 @@ func Insert(ctx context.Context, mahasiswa data.Mahasiswa) error {
 	return nil
 }
 
-func UpdateByID(ctx context.Context, mahasiswa data.Mahasiswa, id int) error {
+func UpdateByID(ctx context.Context, mahasiswa form.UpdateMahasiswa, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)

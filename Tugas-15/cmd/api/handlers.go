@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"tugas15/data"
+	"tugas15/form"
 	"tugas15/mahasiswa"
 	"tugas15/mata_kuliah"
 	"tugas15/nilai"
@@ -24,6 +24,7 @@ func (app *Config) GetAllNilai(w http.ResponseWriter, _ *http.Request, _ httprou
 	if err != nil {
 	  fmt.Println(err)
 	  utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
+	  return
 	}
 
 	payload := utils.JsonResponse{
@@ -37,76 +38,74 @@ func (app *Config) GetAllNilai(w http.ResponseWriter, _ *http.Request, _ httprou
 }
 
 func (app *Config) InsertNilai(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	if r.Header.Get("Content-Type") == "application/json" {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+	if r.Header.Get("Content-Type") != "application/json" {
+        http.Error(w, "Gunakan content type application / json", http.StatusBadRequest)
+        return
+    }
 
-		var newNilai data.Nilai
-		err := json.NewDecoder(r.Body).Decode(&newNilai)
-		if err != nil {
-			utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
-			return
-		}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-		isDuplicate, err := nilai.IsDuplicateNilai(ctx, newNilai.MahasiswaID, newNilai.MataKuliahID)
-		if err != nil {
-			utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR", http.StatusInternalServerError)
-			return
-		}
-
-		if isDuplicate {
-			utils.ErrorJSON(w, errors.New("Data dengan Nama dan Mata Kuliah tersebut sudah ada"), "CONFLICT", http.StatusConflict)
-			return
-		}
-
-		newNilai.Indeks = GetIndeksNilai(newNilai.Nilai)
-
-		if err := nilai.Insert(ctx, newNilai); err != nil {
-			utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
-			return
-		}
-
-		payload := utils.JsonResponse{
-			Code: http.StatusCreated,
-			Status: "CREATED",
-			Message: fmt.Sprintf("Success insert nilai mahasiswa %v", newNilai.MahasiswaID),
-			Data: newNilai,
-		}
-	  
-		utils.WriteJSON(w, http.StatusCreated, payload)
-		
-	} else {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		err := r.ParseMultipartForm(0)
-		if err != nil {
-			utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
-			return
-		}
-
-		newNilai := data.Nilai{
-			MahasiswaID:       	ParseInt(r.FormValue("mahasiswa_id")),
-			MataKuliahID:    	ParseInt(r.FormValue("mata_kuliah_id")),
-			Nilai:      		ParseInt(r.FormValue("nilai")),
-		}
-
-		newNilai.Indeks = GetIndeksNilai(newNilai.Nilai)
-
-		if err := nilai.Insert(ctx, newNilai); err != nil {
-			utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
-			return
-		}
-
-		payload := utils.JsonResponse{
-			Code: http.StatusCreated,
-			Status: "OK",
-			Message: fmt.Sprintf("Success insert nilai mahasiswa %v", newNilai.MahasiswaID),
-			Data: newNilai,
-		}
-	  
-		utils.WriteJSON(w, http.StatusCreated, payload)
+	var newNilai form.InsertNilai
+	err := json.NewDecoder(r.Body).Decode(&newNilai)
+	if err != nil {
+		utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
+		return
 	}
+
+	if newNilai.Nilai > 100 {
+		utils.ErrorJSON(w, errors.New("Nilai tidak boleh melebihi 100 !!"), "BAD REQUEST",http.StatusBadRequest)
+		return
+	}
+
+	isMahasiswaExist, err := mahasiswa.IsExist(ctx, newNilai.MahasiswaID)
+	if err != nil {
+		utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR", http.StatusInternalServerError)
+		return
+	}
+
+	if !isMahasiswaExist {
+		utils.ErrorJSON(w, errors.New("Mahasiswa ID tidak tersedia"), "BAD REQUEST", http.StatusBadRequest)
+		return
+	}
+
+	isMataKuliahExist, err := mata_kuliah.IsExist(ctx, newNilai.MataKuliahID)
+	if err != nil {
+		utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR", http.StatusInternalServerError)
+		return
+	}
+
+	if !isMataKuliahExist {
+		utils.ErrorJSON(w, errors.New("Mata Kuliah ID tidak tersedia"), "BAD REQUEST", http.StatusBadRequest)
+		return
+	}
+
+	isDuplicate, err := nilai.IsDuplicateNilai(ctx, newNilai.MahasiswaID, newNilai.MataKuliahID)
+	if err != nil {
+		utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR", http.StatusInternalServerError)
+		return
+	}
+
+	if isDuplicate {
+		utils.ErrorJSON(w, errors.New("Data dengan Nama dan Mata Kuliah tersebut sudah ada"), "CONFLICT", http.StatusConflict)
+		return
+	}
+
+	newNilai.Indeks = GetIndeksNilai(newNilai.Nilai)
+
+	if err := nilai.Insert(ctx, newNilai); err != nil {
+		utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
+		return
+	}
+
+	payload := utils.JsonResponse{
+		Code: http.StatusCreated,
+		Status: "CREATED",
+		Message: fmt.Sprintf("Success insert nilai mahasiswa %v", newNilai.MahasiswaID),
+		Data: newNilai,
+	}
+	
+	utils.WriteJSON(w, http.StatusCreated, payload)
 }
 
 func (app *Config) UpdateNilai(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -118,14 +117,21 @@ func (app *Config) UpdateNilai(w http.ResponseWriter, r *http.Request, ps httpro
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    var newNilai data.Nilai
+    var newNilai form.UpdateNilai
 
     if err := json.NewDecoder(r.Body).Decode(&newNilai); err != nil {
         utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
 		return
     }
 
+	if newNilai.Nilai > 100 {
+		utils.ErrorJSON(w, errors.New("Nilai tidak boleh melebihi 100 !!"), "BAD REQUEST",http.StatusBadRequest)
+		return
+	}
+
     var idNilai = ps.ByName("id")
+
+	newNilai.Indeks = GetIndeksNilai(newNilai.Nilai)
 
     if err := nilai.UpdateByID(ctx, newNilai, ParseInt(idNilai)); err != nil {
         utils.ErrorJSON(w, err, "INTERNAL SERVER ERROR",http.StatusInternalServerError)
@@ -192,7 +198,7 @@ func (app *Config) InsertMahasiswa(w http.ResponseWriter, r *http.Request, _ htt
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var newMhs data.Mahasiswa
+	var newMhs form.InsertMahasiswa
 	err := json.NewDecoder(r.Body).Decode(&newMhs)
 	if err != nil {
 		utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
@@ -234,7 +240,7 @@ func (app *Config) UpdateMahasiswa(w http.ResponseWriter, r *http.Request, ps ht
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    var newMhs data.Mahasiswa
+    var newMhs form.UpdateMahasiswa
 
     if err := json.NewDecoder(r.Body).Decode(&newMhs); err != nil {
         utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
@@ -308,7 +314,7 @@ func (app *Config) InsertMataKuliah(w http.ResponseWriter, r *http.Request, _ ht
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var newMatkul data.MataKuliah
+	var newMatkul form.InsertMataKuliah
 	err := json.NewDecoder(r.Body).Decode(&newMatkul)
 	if err != nil {
 		utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)
@@ -350,7 +356,7 @@ func (app *Config) UpdateMataKuliah(w http.ResponseWriter, r *http.Request, ps h
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    var newMatkul data.MataKuliah
+    var newMatkul form.UpdateMataKuliah
 
     if err := json.NewDecoder(r.Body).Decode(&newMatkul); err != nil {
         utils.ErrorJSON(w, err, "BAD REQUEST",http.StatusBadRequest)

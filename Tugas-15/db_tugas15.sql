@@ -25,8 +25,10 @@ DROP TABLE IF EXISTS `mahasiswa`;
 CREATE TABLE `mahasiswa` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nama` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,6 +37,7 @@ CREATE TABLE `mahasiswa` (
 
 LOCK TABLES `mahasiswa` WRITE;
 /*!40000 ALTER TABLE `mahasiswa` DISABLE KEYS */;
+INSERT INTO `mahasiswa` VALUES (20001,'Fathoni','2023-08-19 12:53:06','2023-08-19 12:53:06'),(20002,'Zikri','2023-08-19 21:07:43','2023-08-19 21:07:43'),(20003,'Nugroho','2023-08-19 21:08:07','2023-08-19 21:08:07'),(20004,'Patini','2023-08-19 21:39:53','2023-08-19 21:39:53');
 /*!40000 ALTER TABLE `mahasiswa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -48,8 +51,10 @@ DROP TABLE IF EXISTS `mata_kuliah`;
 CREATE TABLE `mata_kuliah` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nama` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,6 +63,7 @@ CREATE TABLE `mata_kuliah` (
 
 LOCK TABLES `mata_kuliah` WRITE;
 /*!40000 ALTER TABLE `mata_kuliah` DISABLE KEYS */;
+INSERT INTO `mata_kuliah` VALUES (101,'Analisis Kebutuhan Perangkat Lunak','2023-08-19 13:00:07','2023-08-19 13:00:07'),(102,'Keamanan Perangkat Lunak','2023-08-19 13:00:19','2023-08-19 13:01:06'),(103,'Pengenalan Rekayasa Perangkat Lunak','2023-08-19 21:08:26','2023-08-19 21:08:26'),(104,'Pengenalan Database','2023-08-19 21:40:43','2023-08-19 21:40:43');
 /*!40000 ALTER TABLE `mata_kuliah` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -71,15 +77,17 @@ DROP TABLE IF EXISTS `nilai`;
 CREATE TABLE `nilai` (
   `id` int NOT NULL AUTO_INCREMENT,
   `indeks` varchar(255) NOT NULL,
-  `skor` int NOT NULL,
+  `nilai` int NOT NULL,
   `mahasiswa_id` int NOT NULL,
   `mata_kuliah_id` int NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `mahasiswa_id` (`mahasiswa_id`),
   KEY `mata_kuliah_id` (`mata_kuliah_id`),
   CONSTRAINT `nilai_ibfk_1` FOREIGN KEY (`mahasiswa_id`) REFERENCES `mahasiswa` (`id`),
   CONSTRAINT `nilai_ibfk_2` FOREIGN KEY (`mata_kuliah_id`) REFERENCES `mata_kuliah` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -88,6 +96,7 @@ CREATE TABLE `nilai` (
 
 LOCK TABLES `nilai` WRITE;
 /*!40000 ALTER TABLE `nilai` DISABLE KEYS */;
+INSERT INTO `nilai` VALUES (1,'A',90,20001,101,'2023-08-19 21:49:33','2023-08-19 22:25:36'),(2,'A',80,20001,102,'2023-08-19 22:20:47','2023-08-19 22:20:47');
 /*!40000 ALTER TABLE `nilai` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -100,15 +109,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-19 10:53:34
-ALTER TABLE `db_tugas15`.`nilai` 
-ADD COLUMN `created_at` DATETIME NOT NULL AFTER `mata_kuliah_id`,
-ADD COLUMN `updated_at` DATETIME NOT NULL AFTER `created_at`;
-
-ALTER TABLE `db_tugas15`.`mata_kuliah` 
-ADD COLUMN `created_at` DATETIME NOT NULL AFTER `nama`,
-ADD COLUMN `updated_at` DATETIME NOT NULL AFTER `created_at`;
-
-ALTER TABLE `db_tugas15`.`mahasiswa` 
-ADD COLUMN `created_at` DATETIME NOT NULL AFTER `nama`,
-ADD COLUMN `updated_at` DATETIME NOT NULL AFTER `created_at`;
+-- Dump completed on 2023-08-19 22:28:29

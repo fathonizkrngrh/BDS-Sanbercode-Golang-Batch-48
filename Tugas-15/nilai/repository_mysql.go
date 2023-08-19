@@ -7,6 +7,7 @@ import (
 	"time"
 	"tugas15/config"
 	"tugas15/data"
+	"tugas15/form"
 )
 
 const (
@@ -33,12 +34,13 @@ func GetAll(ctx context.Context) ([]data.Nilai, error) {
 		var nilai data.Nilai
 		var createdAt, updatedAt string
 		if err = rowQuery.Scan(&nilai.ID,
-			&nilai.Nilai,
 			&nilai.Indeks,
+			&nilai.Nilai,
 			&nilai.MahasiswaID,
 			&nilai.MataKuliahID,
 			&createdAt,
 			&updatedAt); err != nil {
+				log.Println(nilai)
 			return nil, err
 		}
 
@@ -54,6 +56,8 @@ func GetAll(ctx context.Context) ([]data.Nilai, error) {
 		}
 
 		nilaiMhs = append(nilaiMhs, nilai)
+
+		log.Println(nilai)
 	}
 	return nilaiMhs, nil
 }
@@ -74,7 +78,7 @@ func IsDuplicateNilai(ctx context.Context, mahasiswa_id, mata_kuliah_id int) (bo
     return count > 0, nil
 }
 
-func Insert(ctx context.Context, nilai data.Nilai) error {
+func Insert(ctx context.Context, nilai form.InsertNilai) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
@@ -93,7 +97,7 @@ func Insert(ctx context.Context, nilai data.Nilai) error {
 	return nil
 }
 
-func UpdateByID(ctx context.Context, nilai data.Nilai, id int) error {
+func UpdateByID(ctx context.Context, nilai form.UpdateNilai, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)

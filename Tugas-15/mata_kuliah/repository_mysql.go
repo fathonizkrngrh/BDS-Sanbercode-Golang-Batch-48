@@ -7,6 +7,7 @@ import (
 	"time"
 	"tugas15/config"
 	"tugas15/data"
+	"tugas15/form"
 )
 
 const (
@@ -55,6 +56,22 @@ func GetAll(ctx context.Context) ([]data.MataKuliah, error) {
 	return mataKuliah, nil
 }
 
+func IsExist(ctx context.Context, id int) (bool, error) {
+    db, err := config.MySQL()
+    if err != nil {
+        return false, err
+    }
+
+    queryText := fmt.Sprintf("SELECT COUNT(*) FROM %v WHERE id = %v", table, id)
+    var count int
+    err = db.QueryRowContext(ctx, queryText).Scan(&count)
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}
+
 func IsDuplicateMataKuliah(ctx context.Context, nama string) (bool, error) {
     db, err := config.MySQL()
     if err != nil {
@@ -71,7 +88,7 @@ func IsDuplicateMataKuliah(ctx context.Context, nama string) (bool, error) {
     return count > 0, nil
 }
 
-func Insert(ctx context.Context, matkul data.MataKuliah) error {
+func Insert(ctx context.Context, matkul form.InsertMataKuliah) error {
 	db, err := config.MySQL()
 	if err != nil {
 	  log.Fatal("Can't connect to MySQL", err)
@@ -87,7 +104,7 @@ func Insert(ctx context.Context, matkul data.MataKuliah) error {
 	return nil
 }
 
-func UpdateByID(ctx context.Context, matkul data.MataKuliah, id int) error {
+func UpdateByID(ctx context.Context, matkul form.UpdateMataKuliah, id int) error {
 	db, err := config.MySQL()
 	if err != nil {
 		log.Fatal("Can't connect to MySQL", err)
