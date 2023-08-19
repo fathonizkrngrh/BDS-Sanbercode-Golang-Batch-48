@@ -12,7 +12,7 @@ import (
 const (
     username string = "root"
     password string = "fathoni"
-    database string = "data_mhs"
+    database string = "db_tugas15"
 )
 
 var (
